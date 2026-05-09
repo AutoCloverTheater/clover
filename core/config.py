@@ -37,9 +37,9 @@ class Config:
     SCREENSHOTS_DIR = USER_DATA_DIR / "screenshots"
     EXPORTS_DIR = USER_DATA_DIR / "exports"
     LOGS_DIR = USER_DATA_DIR / "logs"
-    TEMPLATES_DIR = USER_DATA_DIR / "templates"
-    PWD = Path(__file__).resolve().parent.parent
 
+    PWD = Path(__file__).resolve().parent.parent
+    TEMPLATES_DIR = PWD / "templates"
     # ADB 配置
     ADB_PATH = os.environ.get("ADB_PATH", "adb")
     ADB_TIMEOUT = 10
