@@ -1,7 +1,7 @@
 # 初始化配置
 import logging
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request,Response
 from app import DeviceX
 from core.service.adb_manager import AdbManager
 from core.service.device_service import DeviceService
@@ -196,3 +196,43 @@ def disconnect_adb():
     DeviceX = DeviceService()
     logger.info("设备已断开")
     return jsonify({})
+
+@adb_bp.route('/screenshot', methods=['GET'])
+def screenshot():
+    """
+    获取设备屏幕截图
+    ---
+    tags:
+      - adb
+    summary: 获取当前设备屏幕截图
+    description: 截取当前连接设备的屏幕，直接返回 PNG 二进制图片
+    responses:
+      200:
+        description: 截图成功
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      400:
+        description: 设备未连接
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "设备未连接"
+    """
+    global DeviceX
+    if DeviceX is None:
+        return jsonify({'error': '设备未连接'}), 400
+    if DeviceX.device_info is None:
+        return jsonify({'error': '设备未连接'}), 400
+    DeviceX = DeviceService()
+    buffer = DeviceX.screenshot_to_raw()
+
+    return Response(
+        buffer.tobytes(),
+        mimetype='image/png',
+        headers={'Content-Type': 'image/png'}
+    )

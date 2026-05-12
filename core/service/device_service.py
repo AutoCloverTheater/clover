@@ -4,6 +4,7 @@
 import os
 import time
 import base64
+import cv2
 import logging
 import threading
 from typing import Optional, List, Dict, Any, Callable, Tuple
@@ -238,7 +239,7 @@ class DeviceService:
         device = self._get_device()
 
         with self._screenshot_lock:
-            img = device.screenshot(format=format)
+            img = device.screenshot(format="opencv")
             self._screenshot_cache = img
 
         logger.debug(f"截图完成: {len(img)} bytes")
@@ -254,9 +255,33 @@ class DeviceService:
         Returns:
             Base64 编码的图片字符串
         """
+        import numpy as np
+        import cv2
+        def cv2_to_base64(img: np.ndarray, format: str = '.png') -> str:
+            """
+            将 OpenCV 图片 (numpy ndarray) 转为 Base64 字符串
+            """
+            # cv2.imencode 返回 (success_flag, encoded_buffer)
+            success, buffer = cv2.imencode(format, img)
+            if not success:
+                raise ValueError("图片编码失败")
+
+            # buffer 是 numpy 数组，转 bytes 后 base64 编码
+            base64_str = base64.b64encode(buffer.tobytes()).decode('utf-8')
+            return base64_str
+
         img_bytes = self.screenshot(format)
-        b64 = base64.b64encode(img_bytes).decode('utf-8')
-        return f"data:image/{format};base64,{b64}"
+        base64_img = cv2_to_base64(img_bytes, format='.png')
+        # return f"data:image/{format};base64,{b64}"
+        return base64_img
+
+
+    def screenshot_to_raw(self) :
+        img_bytes = self.screenshot()
+        success, buffer = cv2.imencode('.png', img_bytes, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+
+
+        return buffer
 
     def screenshot_to_file(self, filepath: str, format: str = 'png') -> str:
         """

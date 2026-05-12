@@ -6,3 +6,5 @@ uiautomator2
 psutil
 
 adbutils
+
+opencv-python
