@@ -1,0 +1,3 @@
+[submodule "desktop"]
+	path = desktop
+	url = https://github.com/AutoCloverTheater/clover-desktop.git
