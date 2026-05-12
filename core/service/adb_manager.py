@@ -3,7 +3,7 @@ import psutil
 from adbutils import adb
 
 
-class UniversalEmulatorScanner:
+class AdbManager:
     def __init__(self):
         # 1. 适配列表：仅包含名称和进程特征
         self.adapters = {
@@ -69,6 +69,7 @@ class UniversalEmulatorScanner:
 
             return {
                 "type": type_name,
+                "emulator": type_name,
                 "serial": serial,
                 "resolution": f"{w}x{h}",
                 "dpi": dpi or "Unknown",
@@ -80,7 +81,7 @@ class UniversalEmulatorScanner:
 
 # --- 调用演示 ---
 if __name__ == "__main__":
-    scanner = UniversalEmulatorScanner()
+    scanner = AdbManager()
     devices = scanner.get_all_devices()
 
     print(f"检测到 {len(devices)} 个设备：")

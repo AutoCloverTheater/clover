@@ -7,12 +7,15 @@ import threading
 import time
 from pathlib import Path
 
+from core.service.device_service import DeviceService
+
 # 将 backend 目录添加到路径
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from flask import Flask, send_from_directory, jsonify, request, abort
 from flask_cors import CORS
 from core.config import Config
+from flasgger import Swagger
 
 # 初始化配置
 Config.ensure_dirs()
@@ -40,17 +43,23 @@ def create_app():
     )
     CORS(app)
 
+    app.config['SWAGGER'] = {
+        'title': '四叶草小助手',
+        'uiversion': 3,
+        'specs_route': '/docs/'  # 文档页面路径，默认 /apidocs/
+    }
+    Swagger(app)
     # 存储配置到 app.config
     app.config.from_object(Config)
 
     # ==================== 注册 API 蓝图 ====================
-    # from api.adb_api import adb_bp
+    from core.api.adb_api import adb_bp
     from core.api.roi_api import roi_bp
     # from api.roi_api import roi_bp
     # from api.task_api import task_bp
     # from api.settings_api import settings_bp
     #
-    # app.register_blueprint(adb_bp, url_prefix='/api/adb')
+    app.register_blueprint(adb_bp, url_prefix='/api/adb')
     # app.register_blueprint(screenshot_bp, url_prefix='/api/screenshot')
     app.register_blueprint(roi_bp, url_prefix='/api/roi')
     # app.register_blueprint(task_bp, url_prefix='/api/tasks')
@@ -103,6 +112,7 @@ def open_browser(port):
     logger.info(f"Opening browser: {url}")
     webbrowser.open(url)
 
+DeviceX = DeviceService()
 
 def main():
     """主入口"""
@@ -112,6 +122,7 @@ def main():
     if not Config.DEBUG:
         threading.Thread(target=open_browser, args=(Config.PORT,),
                          daemon=True).start()
+    # 单例adb
 
     logger.info(f"Starting {Config.APP_NAME} v{Config.APP_VERSION}")
     logger.info(f"Server: http://{Config.HOST}:{Config.PORT}")

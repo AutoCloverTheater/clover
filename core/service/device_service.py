@@ -14,7 +14,7 @@ from io import BytesIO
 import uiautomator2 as u2
 from PIL import Image
 
-from core.service.adb_manager import ADBManager
+from core.service.adb_manager import AdbManager
 
 logger = logging.getLogger(__name__)
 
@@ -125,61 +125,6 @@ class DeviceService:
 
         logger.info("DeviceService 初始化完成")
 
-    # ==================== 设备发现 ====================
-
-    def list_devices(self) -> List[DeviceInfo]:
-        """
-        列出所有设备
-
-        Returns:
-            设备信息列表
-        """
-        devices = []
-
-        try:
-            # 获取 ADB 设备列表
-            adb = ADBManager()
-
-            adb_devices = adb.get_devices()
-
-            for serial, status in adb_devices.items():
-                info = DeviceInfo(
-                    serial=serial,
-                    status='connected' if status == 'device' else status,
-                )
-
-                # 尝试获取设备详细信息
-                if status == 'device':
-                    try:
-                        d = u2.connect(serial)
-                        info.model = d.info.get('productModel', '')
-                        info.brand = d.info.get('productBrand', '')
-                        info.android_version = d.info.get('version', '')
-                        info.sdk_version = d.info.get('sdk', 0)
-                        info.screen_width = d.info.get('displayWidth', 0)
-                        info.screen_height = d.info.get('displayHeight', 0)
-                        info.resolution = f"{info.screen_width}x{info.screen_height}"
-                        info.is_emulator = serial.startswith('emulator-') or \
-                                           'generic' in info.model.lower()
-                    except Exception as e:
-                        logger.debug(f"获取设备 {serial} 详情失败: {e}")
-
-                devices.append(info)
-
-        except Exception as e:
-            logger.error(f"列出设备失败: {e}")
-
-        return devices
-
-    def get_connected_devices(self) -> List[DeviceInfo]:
-        """获取已连接的设备"""
-        return [d for d in self.list_devices() if d.status == 'connected']
-
-    def get_first_device(self) -> Optional[DeviceInfo]:
-        """获取第一个已连接的设备"""
-        devices = self.get_connected_devices()
-        return devices[0] if devices else None
-
     # ==================== 设备连接 ====================
 
     def connect(self, serial: Optional[str] = None,
@@ -269,7 +214,7 @@ class DeviceService:
         return self._device
 
     @property
-    def device_info(self) -> Optional[DeviceInfo]:
+    def device_info(self):
         """获取当前设备信息"""
         return self._device_info
 
