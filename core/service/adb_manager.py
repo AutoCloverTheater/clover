@@ -1,66 +1,79 @@
-import adbutils
-from typing import List, Dict
+import psutil
+from adbutils import adb, AdbTimeout
 
 
-class DeviceScanner:
-    """
-    基于 adbutils 的跨平台设备管理类
-    支持获取 Serial、分辨率、DPI 及模拟器识别
-    """
-
-    def __init__(self, host: str = "127.0.0.1", port: int = 5037):
-        self.adb = adbutils.AdbClient(host=host, port=port)
-
-    def get_detailed_devices(self) -> List[Dict]:
+class EmulatorAdbScanner:
+    def __init__(self, keyword="dnplayer"):
         """
-        获取所有在线设备的详细信息：Serial, 分辨率, DPI, 状态等
+        :param keyword: 模拟器关键字 (dnplayer, MEmu, Nox, HD-Player)
         """
-        detailed_list = []
+        self.keyword = keyword.lower()
 
-        for device in self.adb.device_list():
-            # 仅对在线(device)状态的设备尝试获取详细参数，避免 offline 阻塞
-            info = {
-                "serial": device.serial,
-                "state": device.info.get('state'),
-                "resolution": "N/A",
-                "dpi": "N/A",
-                "is_emulator": self._check_if_emulator(device.serial)
-            }
+    def _find_potential_ports(self):
+        """扫描进程监听的 127.0.0.1 端口"""
+        ports = set()
+        for proc in psutil.process_iter(['name']):
+            try:
+                if self.keyword in proc.info['name'].lower():
+                    for conn in proc.connections(kind='inet'):
+                        if conn.status == 'LISTEN' and conn.laddr.ip == '127.0.0.1':
+                            # 模拟器 ADB 端口范围通常在此区间
+                            if 5000 <= conn.laddr.port <= 65535:
+                                ports.add(conn.laddr.port)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        return ports
 
-            if info["state"] == "device":
-                try:
-                    # 1. 获取分辨率 (返回为 Size 对象，如 Size(width=1080, height=1920))
-                    size = device.window_size()
-                    info["resolution"] = f"{size.width}x{size.height}"
+    def get_devices_data(self):
+        """连接设备并使用 adbutils 提取元数据"""
+        ports = self._find_potential_ports()
+        results = []
 
-                    # 2. 获取 DPI (从系统属性中读取)
-                    # 常见的属性有 ro.sf.lcd_density 或 qemu.sf.lcd_density
-                    dpi = device.prop.get(
-                        "ro.sf.lcd_density") or device.prop.get(
-                        "qemu.sf.lcd_density")
-                    info["dpi"] = dpi if dpi else "unknown"
-                except Exception as e:
-                    info["resolution"] = f"Error: {str(e)}"
+        for port in ports:
+            addr = f"127.0.0.1:{port}"
+            try:
+                # 1. 尝试连接设备
+                adb.connect(addr)
+                device = adb.device(serial=addr)
 
-            detailed_list.append(info)
+                # 2. 获取元数据
+                # window_size 返回一个命名元组，如 (width=1080, height=1920)
+                size = device.window_size()
 
-        return detailed_list
+                # 获取 DPI (通过 shell 执行获取 prop)
+                density = device.shell("wm density")
+                dpi = density.split(':')[
+                    -1].strip() if ":" in density else "Unknown"
 
-    def _check_if_emulator(self, serial: str) -> bool:
-        """识别是否为模拟器"""
-        features = ["127.0.0.1", "emulator-", "localhost", "192.168.56"]
-        return any(f in serial.lower() for f in features)
+                # 获取更多系统信息
+                prop = device.prop
+
+                results.append({
+                    "serial": addr,
+                    "resolution": f"{size[0]}x{size[1]}",
+                    "dpi": dpi,
+                    "model": prop.get("ro.product.model", "Unknown"),
+                    "sdk": prop.get("ro.build.version.sdk", "Unknown"),
+                    "brand": prop.get("ro.product.brand", "Unknown")
+                })
+            except Exception as e:
+                # 端口可能不是 ADB 服务，直接跳过
+                continue
+
+        return results
 
 
-# --- 调用示例 ---
+# --- 使用示例 ---
 if __name__ == "__main__":
-    scanner = DeviceScanner()
-    devices = scanner.get_detailed_devices()
+    # 实例化并扫描
+    scanner = EmulatorAdbScanner(keyword="mumu")  # 雷电
+    devices = scanner.get_devices_data()
 
-    print(f"{'Serial号':<20} {'状态':<10} {'分辨率':<15} {'DPI':<10} {'类型'}")
-    print("-" * 70)
-
-    for d in devices:
-        device_type = "模拟器" if d['is_emulator'] else "真机"
-        print(
-            f"{d['serial']:<20} {d['state']:<10} {d['resolution']:<15} {d['dpi']:<10} {device_type}")
+    if not devices:
+        print("未发现运行中的模拟器或 ADB 连接失败")
+    else:
+        print(f"{'Serial':<20} | {'Resolution':<12} | {'DPI':<6} | {'Model'}")
+        print("-" * 65)
+        for d in devices:
+            print(
+                f"{d['serial']:<20} | {d['resolution']:<12} | {d['dpi']:<6} | {d['model']}")
