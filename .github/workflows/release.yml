@@ -25,11 +25,11 @@ jobs:
     steps:
       # 1. 检出代码
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # 2. 设置 Python 环境
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12' # 替换为你的 Flask 项目所用的 Python 版本
 
@@ -60,7 +60,7 @@ jobs:
 
       # 6. 将压缩后的文件临时上传到 Action 缓存（供 Release 步骤使用）
       - name: Upload artifact to job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.asset_name }}
           path: |
@@ -74,11 +74,11 @@ jobs:
     steps:
       # 1. 检出代码以获取版本上下文
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # 2. 下载上面两个平台打包好的所有产物
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ./artifacts
 
