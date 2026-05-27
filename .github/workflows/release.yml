@@ -40,10 +40,10 @@ jobs:
           pip install -r requirements.txt
 
       # 4. 执行 PyInstaller 打包
-      # 使用前面步骤中调试好的 app.spec 进行打包
+      # 使用前面步骤中调试好的 main.spec 进行打包
       - name: Run PyInstaller
         run: |
-          pyinstaller app.spec
+          pyinstaller main.spec
 
       # 5. 为了方便下载，将打包后的产物进行压缩 (Windows 压缩为 .zip，Mac 压缩为 .tar.gz)
       - name: Compress artifacts (Windows)

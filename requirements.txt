@@ -8,5 +8,5 @@ psutil
 adbutils
 
 opencv-python
-
+pyinstaller
 numpy
