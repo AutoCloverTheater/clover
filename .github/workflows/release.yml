@@ -49,7 +49,7 @@ jobs:
       - name: Compress artifacts (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path dist/main.exe -DestinationPath ${{ matrix.asset_name }}.zip
+          powershell Compress-Archive -Path dist/main -DestinationPath ${{ matrix.asset_name }}.zip
         # 注：如果你用的是文件夹模式（有 _internal），请把上面的 dist/main.exe 改为 dist/main 和 dist/_internal
 
       - name: Compress artifacts (macOS)
