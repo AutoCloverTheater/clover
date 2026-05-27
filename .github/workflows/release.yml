@@ -91,7 +91,7 @@ jobs:
 
       # 4. 自动创建 GitHub Release 并将两个平台的压缩包作为附件发布
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ./release-assets/*
           tag_name: ${{ github.ref_name }}
