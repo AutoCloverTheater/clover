@@ -15,12 +15,12 @@ jobs:
         include:
           # Windows 打包环境 (x86_64)
           - os: windows-latest
-            artifact_name: flask-app-windows-x64.exe
-            asset_name: flask-app-windows-x64
+            artifact_name: clover-windows-x64.exe
+            asset_name: clover-windows-x64
           # Mac M系列芯片打包环境 (M系列芯片必须使用 macos-14 或更新的运行器，它们才是 Apple Silicon M1/M3 架构)
           - os: macos-14
-            artifact_name: flask-app-macos-arm64
-            asset_name: flask-app-macos-arm64
+            artifact_name: clover-macos-arm64
+            asset_name: clover-macos-arm64
 
     steps:
       # 1. 检出代码
