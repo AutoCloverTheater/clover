@@ -193,3 +193,17 @@ class TemplateManager:
 
     def _del_file_from_dir(self):
         path = Path(self.templatesDir)
+
+# class ScreenShot:
+#     def __init__(self):
+#         rootDir = Config.TEMPLATES_DIR
+#         self.imgDir =  rootDir+"/images"
+#         pass
+#
+#     def save(self, img : Union[str, bytes]):
+#
+#         if isinstance(img, bytes):
+#             img = cv2_to_base64(img)
+#             return save_base64_to_file(img, self.imgDir)
+#         if isinstance(img, np):
+#             img = cv2_to_base64(img)

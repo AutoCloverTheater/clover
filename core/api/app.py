@@ -37,9 +37,9 @@ def create_app():
     """创建 Flask 应用"""
     app = Flask(
         __name__,
-        static_folder=str(Config.STATIC_DIR),
+        # static_folder=str(Config.STATIC_DIR),
         static_url_path='',
-        template_folder=str(Config.STATIC_DIR)
+        template_folder=str(Config.TEMPLATES_DIR)
     )
     CORS(app)
 
@@ -66,13 +66,13 @@ def create_app():
     # app.register_blueprint(settings_bp, url_prefix='/api/settings')
 
     # ==================== 静态文件路由 ====================
-    @app.route('/')
-    def index():
-        """主页"""
-        index_file = Config.STATIC_DIR / 'index.html'
-        if index_file.exists():
-            return send_from_directory(str(Config.STATIC_DIR), 'index.html')
-        return '<h1>前端文件未找到</h1><p>请将 index.html 放在 frontend 目录下</p>', 404
+    # @app.route('/')
+    # def index():
+    #     """主页"""
+    #     index_file = Config.STATIC_DIR / 'index.html'
+    #     if index_file.exists():
+    #         return send_from_directory(str(Config.STATIC_DIR), 'index.html')
+    #     return '<h1>前端文件未找到</h1><p>请将 index.html 放在 frontend 目录下</p>', 404
 
     @app.route('/<path:filename>')
     def serve_static(filename):

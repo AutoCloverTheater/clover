@@ -1,8 +1,13 @@
 import json
 import logging
+import os
+
 from flask import Blueprint, jsonify, request, send_file
 from core.config import Config
 from core.tool.filesystem import write_json_file, ensure_file_dir
+from datetime import datetime
+import uuid
+from werkzeug.utils import secure_filename
 
 roi_bp = Blueprint('roi', __name__)
 logger = logging.getLogger(__name__)
@@ -23,6 +28,47 @@ def roi_json():
         write_json_file(file_path, {"templates": {}, "rois" :{}})
     return {"templates": {}, "rois" :{}}
 
+def allowed_file(filename):
+    """检查文件扩展名是否允许"""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@roi_bp.route('/save_screenshot', methods=['POST'])
+def save_screenshot():
+    """接收并保存图片"""
+    try:
+        # 方式1: 从 form-data 接收文件
+        if 'image' not in request.files:
+            return jsonify({'error': '没有找到图片文件'}), 400
+
+        file = request.files['image']
+
+        if file.filename == '':
+            return jsonify({'error': '未选择文件'}), 400
+
+        if file and allowed_file(file.filename):
+            # 生成唯一文件名
+            original_filename = secure_filename(file.filename)
+            ext = original_filename.rsplit('.', 1)[1].lower()
+            new_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}.{ext}"
+
+            # 保存文件
+            save_path = os.path.join(Config.TEMPLATES_DIR, "images", new_filename)
+            file.save(save_path)
+
+            return jsonify({
+                'success': True,
+                'message': '图片上传成功',
+                'filename': new_filename,
+                'path': save_path,
+                'url': f"/uploads/{new_filename}"
+            }), 200
+        else:
+            return jsonify({'error': '不支持的文件类型'}), 400
+
+    except Exception as e:
+        return jsonify({'error': f'上传失败: {str(e)}'}), 500
 
 @roi_bp.route('/roiById', methods=['GET'])
 def get_roi():

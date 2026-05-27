@@ -1,0 +1,102 @@
+name: Build and Release Flask App
+
+# 触发条件：当推送的 tag 以 v 开头时触发（例如 v1.0.0）
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Windows 打包环境 (x86_64)
+          - os: windows-latest
+            artifact_name: flask-app-windows-x64.exe
+            asset_name: flask-app-windows-x64
+          # Mac M系列芯片打包环境 (M系列芯片必须使用 macos-14 或更新的运行器，它们才是 Apple Silicon M1/M3 架构)
+          - os: macos-14
+            artifact_name: flask-app-macos-arm64
+            asset_name: flask-app-macos-arm64
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 设置 Python 环境
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # 替换为你的 Flask 项目所用的 Python 版本
+
+      # 3. 安装依赖（包含 PyInstaller、Flasgger 以及你的项目依赖）
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. 执行 PyInstaller 打包
+      # 使用前面步骤中调试好的 app.spec 进行打包
+      - name: Run PyInstaller
+        run: |
+          pyinstaller app.spec
+
+      # 5. 为了方便下载，将打包后的产物进行压缩 (Windows 压缩为 .zip，Mac 压缩为 .tar.gz)
+      - name: Compress artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          powershell Compress-Archive -Path dist/main.exe -DestinationPath ${{ matrix.asset_name }}.zip
+        # 注：如果你用的是文件夹模式（有 _internal），请把上面的 dist/main.exe 改为 dist/main 和 dist/_internal
+
+      - name: Compress artifacts (macOS)
+        if: matrix.os == 'macos-14'
+        run: |
+          tar -czvf ${{ matrix.asset_name }}.tar.gz -C dist main
+        # 注：如果是单文件，Mac 默认生成无后缀的 main 执行文件；如果是文件夹模式，请根据实际调整压缩路径
+
+      # 6. 将压缩后的文件临时上传到 Action 缓存（供 Release 步骤使用）
+      - name: Upload artifact to job
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            *.zip
+            *.tar.gz
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 检出代码以获取版本上下文
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 下载上面两个平台打包好的所有产物
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      # 3. 整理文件目录，方便上传到 Release
+      - name: Prepare assets for release
+        run: |
+          mkdir ./release-assets
+          find ./artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} ./release-assets/ \;
+          ls -R ./release-assets
+
+      # 4. 自动创建 GitHub Release 并将两个平台的压缩包作为附件发布
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./release-assets/*
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

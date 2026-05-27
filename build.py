@@ -39,7 +39,7 @@ def build():
         # macOS 特定选项
         # '--windowed',                       # macOS: 不显示控制台
         # '--osx-bundle-identifier', 'com.yourcompany.adbtool',
-
+        # pyinstaller --clean --add-data "templates;templates" --add-data "static;static" app.py
         # Windows 特定选项
         # '--icon', 'icon.ico',              # 图标
 
