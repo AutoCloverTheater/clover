@@ -1,36 +1,46 @@
 import json
 import logging
-from pathlib import Path
 from flask import Blueprint, jsonify, request, send_file
 from core.config import Config
+from core.tool.filesystem import write_json_file, ensure_file_dir
 
 roi_bp = Blueprint('roi', __name__)
 logger = logging.getLogger(__name__)
 
 
-def get_roi_file_path(screenshot_id):
+def get_roi_file_path():
     """获取 ROI 数据文件路径"""
-    return Config.TEMPLATES_DIR / f"{screenshot_id}.json"
+    return Config.TEMPLATES_DIR / f"templates.json"
 
+def roi_json():
+    file_path = get_roi_file_path()
 
-@roi_bp.route('/<screenshot_id>', methods=['GET'])
-def get_roi(screenshot_id):
-    """获取指定截图的 ROI 坐标"""
-    file_path = get_roi_file_path(screenshot_id)
-
-    if file_path.exists():
+    if ensure_file_dir(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        return jsonify(data)
+        return data
+    else:
+        write_json_file(file_path, {"templates": {}, "rois" :{}})
+    return {"templates": {}, "rois" :{}}
 
-    return jsonify({'rectangles': [], 'message': '暂无ROI数据'})
+
+@roi_bp.route('/roiById', methods=['GET'])
+def get_roi():
+    """获取指定截图的 ROI 坐标"""
+    data = request.get_json()
+    screenshot_id = data.get('screenshot_id', [])
+
+    if roi_json() is not None:
+        return jsonify({'rois': roi_json().get("rois", {}).get(screenshot_id), 'message': 'ok'})
+    return jsonify({'rois': [], 'message': '暂无ROI数据'})
 
 
-@roi_bp.route('/<screenshot_id>', methods=['POST'])
+
+@roi_bp.route('/roi/edist', methods=['POST'])
 def save_roi(screenshot_id):
     """保存 ROI 坐标"""
     data = request.get_json()
-    rectangles = data.get('rectangles', [])
+    rectangles = data.get('roi', [])
 
     roi_data = {
         'screenshotId': screenshot_id,

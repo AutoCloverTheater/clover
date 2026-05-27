@@ -110,7 +110,7 @@ def open_browser(port):
     time.sleep(1.5)
     url = f'http://127.0.0.1:{port}'
     logger.info(f"Opening browser: {url}")
-    webbrowser.open(url)
+    # webbrowser.open(url)
 
 DeviceX = DeviceService()
 

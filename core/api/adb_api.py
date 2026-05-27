@@ -64,6 +64,12 @@ def get_adb_list():
     adbManagerX = AdbManager()
     devices = adbManagerX.get_all_devices()
 
+    for device in devices:
+        if DeviceX.device_info is not None and DeviceX.device_info.serial == device['serial']:
+            device.setdefault("status", "connected")
+        else:
+            device.setdefault("status", "unconnected")
+
     return jsonify({
         'adb_list': devices
     })

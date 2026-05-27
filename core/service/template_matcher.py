@@ -2,15 +2,12 @@ import cv2
 
 
 class TemplateMatcher:
-    def __init__(self, threshold=0.8):
-        """
-        :param threshold: 匹配阈值，0.8 表示 80% 相似度
-        """
-        self.threshold = threshold
-
-    def find_match(self, target_img, template_img, roi=None):
+    def __init__(self):
+        pass
+    def find_match(self, target_img, template_img, roi=None, threshold=0.8):
         """
         在目标图片中寻找模板
+        :param threshold:
         :param target_img: 大图 (OpenCV 格式)
         :param template_img: 小图/模板 (OpenCV 格式)
         :param roi: 限制区域 [x1, y1, x2, y2]，如果不传则全屏匹配
@@ -29,7 +26,7 @@ class TemplateMatcher:
         res = cv2.matchTemplate(search_img, template_img, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-        if max_val >= self.threshold:
+        if max_val >= threshold:
             # 获取模板尺寸
             h, w = template_img.shape[:2]
 
@@ -47,9 +44,10 @@ class TemplateMatcher:
 
         return {"found": False, "confidence": round(max_val, 4)}
 
-    def find_match_all(self, target_img, template_img, roi=None):
+    def find_match_all(self, target_img, template_img, roi=None, threshold=0.8):
         """
         在目标图片中寻找模板的多个位置
+        :param threshold:
         :param target_img: 大图 (OpenCV 格式)
         :param template_img: 小图/模板 (OpenCV 格式)
         :param roi: 限制区域 [x1, y1, x2, y2]，如果不传则全屏匹配
@@ -70,7 +68,7 @@ class TemplateMatcher:
 
         results = []
 
-        if max_val >= self.threshold:
+        if max_val >= threshold:
             # 获取模板尺寸
             h, w = template_img.shape[:2]
 

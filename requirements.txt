@@ -8,3 +8,5 @@ psutil
 adbutils
 
 opencv-python
+
+numpy
