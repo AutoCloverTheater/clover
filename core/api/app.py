@@ -7,6 +7,8 @@ import threading
 import time
 from pathlib import Path
 
+
+
 from core.service.device_service import DeviceService
 
 # 将 backend 目录添加到路径
@@ -14,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from flask import Flask, send_from_directory, jsonify, request, abort
 from flask_cors import CORS
-from core.config import Config
+from core.config import Config,load_resource_templates
 from flasgger import Swagger
 
 # 初始化配置
@@ -42,6 +44,8 @@ def create_app():
         template_folder=str(Config.TEMPLATES_DIR)
     )
     CORS(app)
+
+    load_resource_templates()
 
     app.config['SWAGGER'] = {
         'title': '四叶草小助手',
@@ -74,14 +78,6 @@ def create_app():
     #         return send_from_directory(str(Config.STATIC_DIR), 'index.html')
     #     return '<h1>前端文件未找到</h1><p>请将 index.html 放在 frontend 目录下</p>', 404
 
-    @app.route('/<path:filename>')
-    def serve_static(filename):
-        """托管静态资源"""
-        file_path = Config.STATIC_DIR / filename
-        if file_path.exists() and file_path.is_file():
-            return send_from_directory(str(Config.STATIC_DIR), filename)
-        return abort(404)
-
     # ==================== 健康检查 ====================
     @app.route('/api/health')
     def health():
@@ -101,7 +97,6 @@ def create_app():
         logger.error(f"Server error: {e}")
         return jsonify({'error': 'Internal Server Error'}), 500
 
-    logger.info(f"Flask app created, static dir: {Config.STATIC_DIR}")
     return app
 
 
@@ -111,6 +106,7 @@ def open_browser(port):
     url = f'http://127.0.0.1:{port}'
     logger.info(f"Opening browser: {url}")
     # webbrowser.open(url)
+
 
 DeviceX = DeviceService()
 
@@ -126,7 +122,6 @@ def main():
 
     logger.info(f"Starting {Config.APP_NAME} v{Config.APP_VERSION}")
     logger.info(f"Server: http://{Config.HOST}:{Config.PORT}")
-    logger.info(f"Data directory: {Config.USER_DATA_DIR}")
 
     app.run(
         host=Config.HOST,

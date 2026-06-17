@@ -100,6 +100,7 @@ class TemplateManager:
 
         try:
             img = TemplateImg(str(img_path))
+            img.set_roi(roi=self.jsonData["rois"][id]["roi"])
             return img
         except Exception as e:
             print(f"加载模板图片失败: {e}")
