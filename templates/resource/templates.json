@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "images_id": 5,
+    "name": "CLICK_TO_START_GAME",
+    "roi": [
+      509,
+      655,
+      262,
+      30
+    ],
+    "color": "#FECA57"
+  },
+  {
+    "id": 2,
+    "images_id": 4,
+    "name": "INPUT_PHONE",
+    "roi": [
+      432,
+      190,
+      143,
+      31
+    ],
+    "color": "#FF9F43"
+  },
+  {
+    "id": 3,
+    "images_id": 4,
+    "name": "INPUT_PASSWORD",
+    "roi": [
+      432,
+      273,
+      122,
+      27
+    ],
+    "color": "#FECA57"
+  },
+  {
+    "id": 4,
+    "images_id": 4,
+    "name": "BTN_LOGIN",
+    "roi": [
+      747,
+      468,
+      58,
+      27
+    ],
+    "color": "#54A0FF"
+  },
+  {
+    "id": 5,
+    "images_id": 3,
+    "name": "INFO_LOADING",
+    "roi": [
+      1109,
+      657,
+      147,
+      17
+    ],
+    "color": "#FF9F43"
+  },
+  {
+    "id": 6,
+    "images_id": 6,
+    "name": "Click-through_Agreement",
+    "roi": [
+      406,
+      396,
+      67,
+      36
+    ],
+    "color": "#FF9F43"
+  }
+]

@@ -104,7 +104,6 @@ def open_browser(port):
     """延迟打开浏览器"""
     time.sleep(1.5)
     url = f'http://127.0.0.1:{port}'
-    logger.info(f"Opening browser: {url}")
     # webbrowser.open(url)
 
 
