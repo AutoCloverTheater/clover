@@ -53,13 +53,14 @@ def create_app():
     # ==================== 注册 API 蓝图 ====================
     from core.api.adb_api import adb_bp
     from core.api.roi_api import roi_bp
-    # from api.roi_api import roi_bp
+    from api.common_api import common_bp
     # from api.task_api import task_bp
     # from api.settings_api import settings_bp
     #
     app.register_blueprint(adb_bp, url_prefix='/api/adb')
     # app.register_blueprint(screenshot_bp, url_prefix='/api/screenshot')
     app.register_blueprint(roi_bp, url_prefix='/api/roi')
+    app.register_blueprint(common_bp, url_prefix='/api/common')
     # app.register_blueprint(task_bp, url_prefix='/api/tasks')
     # app.register_blueprint(settings_bp, url_prefix='/api/settings')
 
