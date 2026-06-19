@@ -115,6 +115,13 @@ def main():
     logger.info(f"Starting {Config.APP_NAME} v{Config.APP_VERSION}")
     logger.info(f"Server: http://{Config.HOST}:{Config.PORT}")
 
+    print("\n=== Registered Routes ===")
+    for rule in app.url_map.iter_rules():
+        methods = sorted(rule.methods - {'HEAD', 'OPTIONS'})
+        print(f"  {rule.rule:30s} [{','.join(methods)}] -> {rule.endpoint}")
+    print("=========================\n")
+
+
     app.run(
         host=Config.HOST,
         port=Config.PORT,
