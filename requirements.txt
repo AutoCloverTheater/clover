@@ -1,12 +1,9 @@
 Flask~=3.1.3
 flask-cors~=6.0.2
-
-uiautomator2
-
+flasgger
 psutil
-
 adbutils
-
 opencv-python
 pyinstaller
 numpy
+flask_restx

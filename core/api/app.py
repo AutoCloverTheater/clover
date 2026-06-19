@@ -1,15 +1,9 @@
-import os
 import sys
-import json
 import logging
-import webbrowser
 import threading
 import time
 from pathlib import Path
 
-
-
-from core.service.device_service import DeviceService
 
 # 将 backend 目录添加到路径
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -41,7 +35,7 @@ def create_app():
         __name__,
         # static_folder=str(Config.STATIC_DIR),
         static_url_path='',
-        template_folder=str(Config.TEMPLATES_DIR)
+        # template_folder=str(Config.TEMPLATES_DIR)
     )
     CORS(app)
 
@@ -106,8 +100,6 @@ def open_browser(port):
     url = f'http://127.0.0.1:{port}'
     # webbrowser.open(url)
 
-
-DeviceX = DeviceService()
 
 def main():
     """主入口"""

@@ -43,7 +43,7 @@ jobs:
       # 使用前面步骤中调试好的 main.spec 进行打包
       - name: Run PyInstaller
         run: |
-          pyinstaller main.spec
+          pyinstaller main.spec.workflows
 
       # 5. 为了方便下载，将打包后的产物进行压缩 (Windows 压缩为 .zip，Mac 压缩为 .tar.gz)
       - name: Compress artifacts (Windows)
