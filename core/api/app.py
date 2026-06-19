@@ -53,7 +53,7 @@ def create_app():
     # ==================== 注册 API 蓝图 ====================
     from core.api.adb_api import adb_bp
     from core.api.roi_api import roi_bp
-    from api.common_api import common_bp
+    from core.api.common_api import common_bp
     # from api.task_api import task_bp
     # from api.settings_api import settings_bp
     #
