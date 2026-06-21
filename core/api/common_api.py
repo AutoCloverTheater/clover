@@ -50,6 +50,7 @@ def pwd():
     items = os.listdir(current_dir)
     data = {
         'pwd': current_dir,
+        'resource_dir': Config.RESOURCE_DIR,
         'items': items,
         'message': 'ok',
         'success': True

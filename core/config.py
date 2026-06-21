@@ -23,8 +23,12 @@ class Config:
     IS_FROZEN = getattr(sys, 'frozen', False)
 
     PWD = Path(__file__).resolve().parent.parent
-    LOGS_DIR = PWD / "logs"
-    RESOURCE_DIR = PWD / "resource"
+
+    cwd = os.getcwd()
+
+    LOGS_DIR = Path(cwd).resolve() / "logs"
+    cwd = Path(cwd).resolve().parent
+    RESOURCE_DIR = cwd / "resource"
     RESOURCE_TEMPLATES_JSON = RESOURCE_DIR / "templates.json"
     TEMPLATES_DIR = RESOURCE_DIR / "templates"
     # ADB 配置
